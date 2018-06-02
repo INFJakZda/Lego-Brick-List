@@ -155,7 +155,7 @@ class DataBaseHelper
         try {
             this.openDataBase()
 
-            var cursor = this.readableDatabase.query("Inventories" , arrayOf("_id, Name, Active, LastAccessed"), null, null, null, null, "LastAccessed ASC")
+            var cursor = this.readableDatabase.query("Inventories" , arrayOf("_id, Name, Active, LastAccessed"), null, null, null, null, "LastAccessed DESC")
 
             if (cursor.moveToFirst()) {
                 do {
