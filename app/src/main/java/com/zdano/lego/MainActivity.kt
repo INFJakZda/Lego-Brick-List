@@ -1,10 +1,11 @@
 package com.zdano.lego
 
+import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ArrayAdapter
 import com.zdano.lego.database.DataBaseHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -20,20 +21,10 @@ class MainActivity : AppCompatActivity() {
 
         db = DataBaseHelper(this)
         db.createDataBase()
-        db.openDataBase()
-        var archive : String? = null
-        var cursor = db.readableDatabase.query("Inventories" , arrayOf("_id, Name, Active, LastAccessed"), null, null, null, null, "LastAccessed ASC")
+        showProjectList()
 
-        if (cursor.moveToFirst()) {
-            var name = cursor.getString(cursor.getColumnIndex("Name"))
-            textView.text = name
-        }
-        cursor.close()
-        db.close()
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        fab.setOnClickListener {
+            addInventory()
         }
     }
 
@@ -51,5 +42,23 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showProjectList() {
+        var inventoryLists = db.getInventoryList()
+
+        val listNames = arrayOfNulls<String>(inventoryLists.size)
+
+        for ((i, inventory) in inventoryLists.withIndex()) {
+            listNames[i] = inventory.name
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listNames)
+        inventory_list_view.adapter = adapter
+    }
+
+    private fun addInventory() {
+        val intent = Intent(this, InventoryAdd::class.java)
+        startActivity(intent)
     }
 }
