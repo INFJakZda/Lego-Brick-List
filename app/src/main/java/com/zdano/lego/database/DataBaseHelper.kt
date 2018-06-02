@@ -5,7 +5,9 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import com.zdano.lego.model.Inventory
+import com.zdano.lego.model.Part
 import java.io.FileOutputStream
 import java.io.IOException
 
@@ -175,4 +177,33 @@ class DataBaseHelper
         return inventoryList
     }
 
+    fun getPartList(code: Int): ArrayList<Part> {
+        val partList = ArrayList<Part>()
+
+        try {
+            this.openDataBase()
+
+            var cursor = this.readableDatabase.query("InventoriesParts" , arrayOf("_id, InventoryID, TypeID, ItemID, QuantityInSet, QuantityInStore, ColorID, Extra"), "InventoryID = " + code.toString(), null, null, null, "QuantityInStore")
+
+            if (cursor.moveToFirst()) {
+                do {
+                    var id = cursor.getInt(cursor.getColumnIndex("_id"))
+                    var inventoryId = cursor.getInt(cursor.getColumnIndex("InventoryID"))
+                    var typeId = cursor.getInt(cursor.getColumnIndex("TypeID"))
+                    var itemId = cursor.getInt(cursor.getColumnIndex("ItemID"))
+                    var quantityInSet = cursor.getInt(cursor.getColumnIndex("QuantityInSet"))
+                    var quantityInStore = cursor.getInt(cursor.getColumnIndex("QuantityInStore"))
+                    var colorId = cursor.getInt(cursor.getColumnIndex("ColorID"))
+                    var extra = cursor.getInt(cursor.getColumnIndex("Extra"))
+
+                    partList.add(Part(id, inventoryId, typeId, itemId, quantityInSet, quantityInStore, colorId, extra))
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
+            this.close()
+        } catch (e: SQLiteException) {
+            Log.i("SQLERR", e.toString())
+        }
+        return partList
+    }
 }

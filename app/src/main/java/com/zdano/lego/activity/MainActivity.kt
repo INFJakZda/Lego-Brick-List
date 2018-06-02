@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ListView
 import com.zdano.lego.R
 import com.zdano.lego.database.DataBaseHelper
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var db : DataBaseHelper
     var Url = "http://fcds.cs.put.poznan.pl/MyWeb/BL/"
+    private lateinit var listView: ListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,10 @@ class MainActivity : AppCompatActivity() {
 
         fab.setOnClickListener {
             addInventory()
+        }
+
+        inventory_list_view.setOnItemClickListener { _, _, position, _ ->
+            inventoryDetails(position)
         }
     }
 
@@ -92,5 +98,13 @@ class MainActivity : AppCompatActivity() {
             putExtra(URL_MESSAGE, Url)
         }
         startActivity(intent)
+    }
+
+    private fun inventoryDetails(position: Int) {
+        var inventoryList = db.getInventoryList()
+        var inventory = inventoryList[position]
+
+        val detailIntent = InventoryParts.newIntent(this, inventory)
+        startActivity(detailIntent)
     }
 }
