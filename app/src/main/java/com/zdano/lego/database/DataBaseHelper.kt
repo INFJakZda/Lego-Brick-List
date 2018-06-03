@@ -1,15 +1,20 @@
 package com.zdano.lego.database
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.zdano.lego.model.Inventory
 import com.zdano.lego.model.Part
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.*
 
 class DataBaseHelper
 /**
@@ -205,5 +210,70 @@ class DataBaseHelper
             Log.i("SQLERR", e.toString())
         }
         return partList
+    }
+
+    fun createProject(projectCode: String): Int {
+        this.openDataBase()
+
+        val values = ContentValues()
+        values.put("Name", """Projekt $projectCode""")
+        values.put("Active", 1)
+        values.put("LastAccessed", Calendar.getInstance().timeInMillis.toInt())
+
+        var id = this.writableDatabase.insert("Inventories", null, values)
+        this.close()
+        return id.toInt()
+    }
+
+    fun getTitle(itemId: Int, colorId: Int): String {
+        var cursor: Cursor? = null
+        var name: String = ""
+        try {
+            this.openDataBase()
+            cursor = this.readableDatabase.query("Parts" , arrayOf("Name"), "Code = $itemId", null, null, null, null)
+            if (cursor.moveToFirst()) {
+                name = cursor.getString(cursor.getColumnIndex("Name"))
+            }
+        } catch (e: SQLiteException) {
+
+        } finally {
+            cursor?.close()
+            this.close()
+        }
+        return name
+    }
+
+    fun getImage(itemId: Int, colorId: Int): Bitmap? {
+
+        this.openDataBase()
+
+        var idCursor = this.readableDatabase.query("Parts" , arrayOf("_id"), "Code = " + itemId.toString(), null, null, null, null)
+        var id: Int = 0
+        if (idCursor.moveToFirst()) {
+            id = idCursor.getInt(idCursor.getColumnIndex("_id"))
+        }
+
+        var colorCursor = this.readableDatabase.query("Colors" , arrayOf("_id"), "Code = " + colorId.toString(), null, null, null, null)
+        var color: Int = 0
+        if (colorCursor.moveToFirst()) {
+            color = colorCursor.getInt(colorCursor.getColumnIndex("_id"))
+        }
+
+        var cursor = this.readableDatabase.query("Codes", arrayOf("Image"), "ItemID = " + id.toString() + " and ColorID = " + color.toString(), null, null, null, null)
+
+        if (cursor.count > 0) {
+            cursor.moveToFirst()
+            if (cursor.getBlob(cursor.getColumnIndex("Image")) != null) {
+                var image = cursor.getBlob(cursor.getColumnIndex("Image"))
+                val bmp = BitmapFactory.decodeByteArray(image, 0, image.size)
+                return Bitmap.createScaledBitmap(bmp, 250, 250, false)
+            }
+
+        }
+        this.close()
+        cursor.close()
+        idCursor.close()
+        colorCursor.close()
+        return null
     }
 }

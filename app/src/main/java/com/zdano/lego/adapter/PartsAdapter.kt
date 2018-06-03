@@ -1,8 +1,6 @@
 package com.zdano.lego.adapter
 
 import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,33 +35,17 @@ class PartsAdapter(private val context: Context,
 
         val title = rowView.findViewById<TextView>(R.id.part_list_title)
         val subtitle = rowView.findViewById<TextView>(R.id.part_list_subtitle)
-        val thumbnails = rowView.findViewById<ImageView>(R.id.part_list_thumbnail)
+        val thumbnail = rowView.findViewById<ImageView>(R.id.part_list_thumbnail)
 
         val part = getItem(position) as Part
-
+        val resourceId = R.mipmap.ic_launcher
         db = DataBaseHelper(this.context)
-        title.text = getTitle(part.itemID, part.colorID)
+        title.text = db.getTitle(part.itemID, part.colorID)
         subtitle.text = part.quantityInSet.toString() + "/" + part.quantityInStore.toString()
-
+        thumbnail.setImageBitmap(db.getImage(part.itemID, part.colorID))
 
         return rowView
     }
 
-    private fun getTitle(itemId: Int, colorId: Int): String {
-        var cursor: Cursor? = null
-        var name: String = ""
-        try {
-            db.openDataBase()
-            cursor = db.readableDatabase.query("Parts" , arrayOf("Name"), "Code = $itemId", null, null, null, null)
-            if (cursor.moveToFirst()) {
-                name = cursor.getString(cursor.getColumnIndex("Name"))
-            }
-        } catch (e: SQLiteException) {
 
-        } finally {
-            cursor?.close()
-            db.close()
-        }
-        return name
-    }
 }

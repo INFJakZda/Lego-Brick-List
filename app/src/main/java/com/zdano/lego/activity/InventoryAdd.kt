@@ -1,17 +1,17 @@
 package com.zdano.lego.activity
 
-import android.content.ContentValues
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.zdano.lego.R
 import com.zdano.lego.database.DataBaseHelper
 import kotlinx.android.synthetic.main.activity_inventory_add.*
-import java.util.Calendar.getInstance
 
 class InventoryAdd : AppCompatActivity() {
 
     var Url: String = ""
+    private lateinit var db : DataBaseHelper
+    var projectId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,18 +21,11 @@ class InventoryAdd : AppCompatActivity() {
     }
 
     fun addProject(view: View) {
-        var projectId = projectNo.text.toString()
-        var db = DataBaseHelper(this)
-        val values = ContentValues()
+        db = DataBaseHelper(this)
 
-        db.openDataBase()
+        var projectCode = projectNo.text.toString()
+        projectId = db.createProject(projectCode)
 
-        values.put("Name", """Projekt $projectId""")
-        values.put("Active", 1)
-        values.put("LastAccessed", getInstance().timeInMillis.toInt())
-
-        db.writableDatabase.insert("Inventories", null, values)
-        db.close()
         finish()
     }
 }
