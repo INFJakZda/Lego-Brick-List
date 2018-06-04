@@ -15,6 +15,7 @@ import com.zdano.lego.model.Part
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 class DataBaseHelper
 /**
@@ -201,7 +202,7 @@ class DataBaseHelper
                     var colorId = cursor.getInt(cursor.getColumnIndex("ColorID"))
                     var extra = cursor.getInt(cursor.getColumnIndex("Extra"))
 
-                    partList.add(Part(id, inventoryId, typeId, itemId, quantityInSet, quantityInStore, colorId, extra))
+                    partList.add(Part(id, inventoryId, typeId, itemId, quantityInSet, quantityInStore, colorId, extra, this.getTitle(itemId, colorId), this.getImage(itemId, colorId)))
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -268,12 +269,37 @@ class DataBaseHelper
                 val bmp = BitmapFactory.decodeByteArray(image, 0, image.size)
                 return Bitmap.createScaledBitmap(bmp, 250, 250, false)
             }
-
         }
         this.close()
         cursor.close()
         idCursor.close()
         colorCursor.close()
         return null
+    }
+
+    fun addPartsInventory(items: ArrayList<ArrayList<String>>, projectId: Int): Boolean {
+        this.openDataBase()
+        for (i in items)
+        {
+            if (i.size != 8)
+            {
+                throw Exception("Bad XML parsing")
+            }
+            if (i[5] == "N")
+            {
+                val values = ContentValues()
+                values.put("InventoryID", projectId)
+                values.put("TypeID", i[0])
+                values.put("ItemID", i[1])
+                values.put("QuantityInSet", i[2].toInt())
+                values.put("QuantityInStore", 0)
+                values.put("ColorID", i[3])
+                values.put("Extra", i[4])
+                this.writableDatabase.insert("InventoriesParts", null, values)
+                //getImage(ItemID.toString(), ColorID.toString(), mContext)
+            }
+        }
+        this.close()
+        return true
     }
 }

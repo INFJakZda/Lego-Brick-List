@@ -1,6 +1,5 @@
 package com.zdano.lego.activity
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
@@ -28,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        val context = this
 
         db = DataBaseHelper(this)
         db.createDataBase()
@@ -48,22 +48,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_main, menu)
-//        return true
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-//        return when (item.itemId) {
-//            R.id.action_settings -> true
-//            else -> super.onOptionsItemSelected(item)
-//        }
         when (item.itemId) {
             R.id.action_settings -> {
                 val builder = AlertDialog.Builder(this)
@@ -73,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 input.inputType = InputType.TYPE_CLASS_TEXT
                 input.setText(Url)
                 builder.setView(input)
-                builder.setPositiveButton("OK", DialogInterface.OnClickListener { _, _ -> Url = input.text.toString()})
+                builder.setPositiveButton("OK", { _, _ -> Url = input.text.toString()})
                 builder.show()
             }
         }
@@ -101,6 +91,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun inventoryDetails(position: Int) {
+
         var inventoryList = db.getInventoryList()
         var inventory = inventoryList[position]
 
